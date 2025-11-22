@@ -15,7 +15,8 @@ import UserList from './components/UserList';
 import UserPhotos from './components/UserPhotos';
 import UserComments from './components/UserComments';
 import LoginRegister from './components/LoginRegister';
-import { useStore } from './lib/store';
+import useStore from './lib/store';
+import { checkSession } from './lib/api';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -51,6 +52,29 @@ function ProtectedRoute({ children }) {
 
 function PhotoShare() {
   const currentUser = useStore((state) => state.currentUser);
+  const setCurrentUser = useStore((state) => state.setCurrentUser);
+  const [isCheckingSession, setIsCheckingSession] = React.useState(true);
+
+  // Check session on mount to restore user after page refresh
+  React.useEffect(() => {
+    const restoreSession = async () => {
+      try {
+        const user = await checkSession();
+        setCurrentUser(user);
+      } catch (err) {
+        // No active session, user stays logged out
+        console.log('No active session');
+      } finally {
+        setIsCheckingSession(false);
+      }
+    };
+    restoreSession();
+  }, []); // Only run once on mount
+
+  // Show loading state while checking session
+  if (isCheckingSession) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -61,12 +85,14 @@ function PhotoShare() {
               <TopBar />
             </Grid>
             <div className="main-topbar-buffer" />
-            <Grid item sm={3}>
-              <Paper className="main-grid-item">
-                <UserList />
-              </Paper>
-            </Grid>
-            <Grid item sm={9}>
+            {currentUser && (
+              <Grid item sm={3}>
+                <Paper className="main-grid-item">
+                  <UserList />
+                </Paper>
+              </Grid>
+            )}
+            <Grid item sm={currentUser ? 9 : 12}>
               <Paper className="main-grid-item">
                 <Routes>
                   <Route
@@ -84,43 +110,43 @@ function PhotoShare() {
                   <Route path="/login-register" element={<LoginRegister />} />
                   <Route
                     path="/users/:userId"
-                    element={
+                    element={(
                       <ProtectedRoute>
                         <UserDetailRoute />
                       </ProtectedRoute>
-                    }
+                    )}
                   />
                   <Route
                     path="/photos/:userId"
-                    element={
+                    element={(
                       <ProtectedRoute>
                         <UserPhotosRoute />
                       </ProtectedRoute>
-                    }
+                    )}
                   />
                   <Route
                     path="/photos/:userId/:photoIndex"
-                    element={
+                    element={(
                       <ProtectedRoute>
                         <UserPhotosRoute />
                       </ProtectedRoute>
-                    }
+                    )}
                   />
                   <Route
                     path="/comments/:userId"
-                    element={
+                    element={(
                       <ProtectedRoute>
                         <UserCommentsRoute />
                       </ProtectedRoute>
-                    }
+                    )}
                   />
                   <Route
                     path="/users"
-                    element={
+                    element={(
                       <ProtectedRoute>
                         <UserList />
                       </ProtectedRoute>
-                    }
+                    )}
                   />
                 </Routes>
               </Paper>

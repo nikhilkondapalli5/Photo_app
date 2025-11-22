@@ -2,16 +2,16 @@ import React from 'react';
 import { AppBar, Toolbar, Typography, FormControlLabel, Switch, Button } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useStore } from '../../lib/store';
+import axios from "axios";
+import useStore from '../../lib/store';
 import { fetchUser, logout } from '../../lib/api';
 import './styles.css';
-import axios from "axios";
 
 function TopBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { advancedFeaturesEnabled, toggleAdvancedFeatures, currentUser, clearCurrentUser } = useStore();
-  const queryClient = useQueryClient(); 
+  const queryClient = useQueryClient();
 
   const path = location.pathname;
   const userMatch = path.match(/\/users\/([^/]+)/);
@@ -52,10 +52,10 @@ function TopBar() {
   const handleUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-  
+
     const formData = new FormData();
-    formData.append("photo", file);
-  
+    formData.append("uploadedphoto", file);
+
     try {
       await axios.post("http://localhost:3001/photos/new", formData, {
         withCredentials: true,
@@ -63,12 +63,12 @@ function TopBar() {
           "Content-Type": "multipart/form-data",
         },
       });
-  
+
       alert("Photo uploaded!");
-  
+
       // Refresh photos using react-query
       queryClient.invalidateQueries(["photos", currentUser._id]);
-  
+
     } catch (err) {
       alert("Upload failed");
       console.error(err);
@@ -81,16 +81,16 @@ function TopBar() {
         <Typography variant="h5" color="inherit">
           Nikhil Sesha Sai Kondapalli & Nrityya Sivakumar Annu
         </Typography>
-  
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-  
+
           {currentUser ? (
             <>
               {/* Always visible when logged in */}
               <Typography variant="body1" color="inherit">
                 Hi {currentUser.first_name}
               </Typography>
-  
+
               <Button
                 variant="contained"
                 color="secondary"
@@ -99,7 +99,7 @@ function TopBar() {
               >
                 Logout
               </Button>
-  
+
               {/* Add Photo only when viewing your own page */}
               {currentUser._id === userId && (
                 <Button variant="contained" color="secondary" component="label">
@@ -118,18 +118,18 @@ function TopBar() {
               Please Login
             </Typography>
           )}
-  
+
           <FormControlLabel
-            control={
+            control={(
               <Switch
                 checked={advancedFeaturesEnabled}
                 onChange={toggleAdvancedFeatures}
                 color="default"
               />
-            }
+            )}
             label="Enable Advanced Features"
           />
-  
+
           <Typography variant="h6" color="inherit">
             {contextText}
           </Typography>
@@ -137,9 +137,9 @@ function TopBar() {
       </Toolbar>
     </AppBar>
   );
-  
 
-  
+
+
 }
 
 export default TopBar;

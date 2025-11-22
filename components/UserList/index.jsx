@@ -2,7 +2,7 @@ import React from 'react';
 import { Divider, List, ListItem, ListItemText, Typography, Badge, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useQuery, useQueries } from '@tanstack/react-query';
-import { useStore } from '../../lib/store';
+import useStore from '../../lib/store';
 import { fetchUsers, fetchUserCommentCounts } from '../../lib/api';
 import './styles.css';
 

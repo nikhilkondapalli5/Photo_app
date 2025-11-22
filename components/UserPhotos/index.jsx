@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useStore } from '../../lib/store';
+import useStore from '../../lib/store';
 import { fetchUserPhotos, fetchUser, addComment } from '../../lib/api';
 import './styles.css';
 
@@ -38,7 +38,7 @@ function UserPhotos({ userId, photoIndex }) {
       [photoId]: "",
     }));
   };
-  
+
 
   const { data: photos = [], isLoading: isLoadingPhotos } = useQuery({
     queryKey: ['photos', userId],
@@ -150,9 +150,7 @@ function UserPhotos({ userId, photoIndex }) {
                 fullWidth
                 label="Add a comment"
                 value={commentText[photo._id] || ""}
-                onChange={(e) =>
-                  setCommentText((prev) => ({ ...prev, [photo._id]: e.target.value }))
-                }
+                onChange={(e) => setCommentText((prev) => ({ ...prev, [photo._id]: e.target.value }))}
               />
               <Button
                 variant="contained"
@@ -217,9 +215,7 @@ function UserPhotos({ userId, photoIndex }) {
                 fullWidth
                 label="Add a comment"
                 value={commentText[photo._id] || ""}
-                onChange={(e) =>
-                  setCommentText((prev) => ({ ...prev, [photo._id]: e.target.value }))
-                }
+                onChange={(e) => setCommentText((prev) => ({ ...prev, [photo._id]: e.target.value }))}
               />
               <Button
                 variant="contained"

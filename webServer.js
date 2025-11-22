@@ -11,10 +11,8 @@ import bluebird from "bluebird";
 import express from "express";
 import session from "express-session";
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import path, { dirname } from 'path';
 import multer from "multer";
-import path from "path";
-
 // ToDO - Your submission should work without this line. Comment out or delete this line for tests and before submission!
 // import models from "./modelData/photoApp.js";
 
@@ -160,12 +158,35 @@ app.post('/admin/logout', (request, response) => {
     return response.status(400).send('No user logged in');
   }
 
-  request.session.destroy((err) => {
+  return request.session.destroy((err) => {
     if (err) {
       return response.status(500).send('Logout failed');
     }
     return response.status(200).send('Logged out successfully');
   });
+});
+
+/**
+ * GET /admin/session - Check if user is logged in
+ */
+app.get('/admin/session', async (req, res) => {
+  if (!req.session.user_id) {
+    return res.status(401).send('Not logged in');
+  }
+
+  try {
+    const user = await User.findById(req.session.user_id, '_id first_name last_name').exec();
+    if (!user) {
+      return res.status(401).send('User not found');
+    }
+    return res.status(200).send({
+      _id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+    });
+  } catch (err) {
+    return res.status(500).send('Error fetching user');
+  }
 });
 
 /**
@@ -338,7 +359,7 @@ app.get('/photosOfUser/:id', requireAuth, async (request, response) => {
     }
 
     // Fetch photos for this user
-    const photos = await Photo.find({ user_id: userId }, '_id user_id file_name date_time comments').exec();  
+    const photos = await Photo.find({ user_id: userId }, '_id user_id file_name date_time comments').exec();
 
     // Process photos to populate comment user information
     const photosWithComments = await Promise.all(
@@ -410,9 +431,9 @@ app.post('/commentsOfPhoto/:photo_id', requireAuth, async (req, res) => {
     photo.comments.push(newComment);
     await photo.save();
 
-    res.status(200).send(newComment);
+    return res.status(200).send(newComment);
   } catch (err) {
-    res.status(500).send("Error adding comment");
+    return res.status(500).send("Error adding comment");
   }
 });
 
@@ -452,7 +473,7 @@ app.post('/photos/new', requireAuth, upload.single('uploadedphoto'), async (req,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send("Upload failed");
+    return res.status(500).send("Upload failed");
   }
 });
 

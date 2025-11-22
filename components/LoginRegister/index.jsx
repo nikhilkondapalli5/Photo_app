@@ -10,8 +10,8 @@ import {
   Alert,
   Divider,
 } from "@mui/material";
-import { useStore } from "../../lib/store";
 import axios from "axios";
+import useStore from "../../lib/store";
 
 function LoginRegister() {
   const [loginName, setLoginName] = useState("");
@@ -34,11 +34,10 @@ function LoginRegister() {
 
   // Login Mutation
   const loginMutation = useMutation({
-    mutationFn: async ({ login_name, password }) =>
-      axios.post("http://localhost:3001/admin/login", {
-        login_name,
-        password,
-      }),
+    mutationFn: async ({ login_name, password }) => axios.post("http://localhost:3001/admin/login", {
+      login_name,
+      password,
+    }),
     onSuccess: (res) => {
       setCurrentUser(res.data);
       navigate(`/users/${res.data._id}`);
@@ -150,9 +149,7 @@ function LoginRegister() {
             <TextField
               fullWidth label="Confirm Password" type="password" margin="dense"
               value={reg.confirmPassword}
-              onChange={(e) =>
-                setReg({ ...reg, confirmPassword: e.target.value })
-              }
+              onChange={(e) => setReg({ ...reg, confirmPassword: e.target.value })}
             />
 
             <TextField
